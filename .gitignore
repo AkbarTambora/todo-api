@@ -5,3 +5,6 @@ node_modules
 
 # Abaikan file environment rahasia
 .env
+
+# Abaikan folder data yang dibuat oleh Docker
+pgdata/

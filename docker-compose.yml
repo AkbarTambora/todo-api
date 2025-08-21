@@ -1,0 +1,37 @@
+# docker-compose.yml
+
+version: '3.8' # Versi syntax docker-compose
+
+# 'services' adalah daftar semua mesin/kontainer yang akan kita jalankan
+services:
+
+  # Service #1: Database kita
+  db:
+    image: postgres # Gunakan image resmi postgres dari Docker Hub
+    restart: always # Jika mati, otomatis nyalakan lagi
+    environment:
+      # Ini adalah cara kita memberikan 'post-it note' rahasia ke kontainer postgres
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      # Ini penting! Agar data database tidak hilang saat kontainer dimatikan
+      # Menghubungkan folder 'pgdata' di laptop kita ke folder data di dalam kontainer
+      - ./pgdata:/var/lib/postgresql/data
+
+  # Service #2: Aplikasi API (backend) kita
+  api:
+    build: . # Bangun image dari Dockerfile yang ada di folder ini
+    restart: always
+    ports:
+      # Hubungkan port 8000 di laptop kita ke port 3000 di dalam kontainer
+      - "8000:3000"
+    environment:
+      # Beri 'post-it note' ke aplikasi Node.js kita
+      DB_USER: ${DB_USER}
+      DB_HOST: db # PENTING! Host-nya sekarang adalah nama service 'db' di atas, bukan 'localhost'
+      DB_DATABASE: ${DB_DATABASE}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+    depends_on:
+      - db # Bilang ke Docker: "Jangan nyalakan 'api' sebelum 'db' benar-benar siap"

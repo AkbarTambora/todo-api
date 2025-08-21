@@ -1,0 +1,14 @@
+# .dockerignore
+
+# Jangan pernah ikutkan dependensi, biarkan kontainer install sendiri
+node_modules
+
+# Jangan sentuh folder data milik database!
+pgdata
+
+# Jangan pernah ikutkan file rahasia ke dalam image
+.env
+
+# Abaikan file git
+.git
+.gitignore

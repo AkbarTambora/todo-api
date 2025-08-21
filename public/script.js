@@ -1,7 +1,7 @@
 // public/script.js
 
 // Alamat base API kita
-const API_URL = 'http://localhost:3000/api/tasks';
+const API_URL = 'http://localhost:8000/api/tasks';
 
 // Mengambil elemen-elemen dari HTML
 const taskList = document.getElementById('task-list');
