@@ -1,0 +1,38 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Todo Sederhana</title>
+    <!-- Hubungkan ke file CSS kita -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Daftar Tugasku</h1>
+        
+        <!-- Formulir untuk menambah task baru -->
+        <form id="task-form" class="task-form">
+            <input type="text" id="task-input" placeholder="Apa rencanamu hari ini?" required>
+            <button type="submit">Tambah</button>
+        </form>
+
+        <!-- Di sini kita akan menampilkan daftar tugas -->
+        <ul id="task-list" class="task-list">
+            <!-- Contoh tampilan task, nanti akan dibuat oleh JavaScript -->
+            <!-- <li>
+                <span>Belajar Frontend</span>
+                <div class="actions">
+                    <button class="btn-complete">Selesai</button>
+                    <button class="btn-delete">Hapus</button>
+                </div>
+            </li> -->
+        </ul>
+    </div>
+
+    <!-- Hubungkan ke file JavaScript kita (PENTING: taruh di akhir body) -->
+    <script src="script.js"></script>
+</body>
+</html>
