@@ -35,22 +35,36 @@ const fetchTasks = async (page) => {
             const title = document.createElement('span');
             title.textContent = task.title;
             if (task.is_completed) { title.className = 'completed'; }
+            
             const actions = document.createElement('div');
             actions.className = 'actions';
+
+            // Tombol Selesai/Batal dengan icon
             const completeButton = document.createElement('button');
             completeButton.className = 'btn-complete';
-            completeButton.textContent = task.is_completed ? 'Batal' : 'Selesai';
+            if (task.is_completed) {
+                completeButton.classList.add('completed');
+                completeButton.innerHTML = '<i class="fas fa-undo"></i>'; 
+            } else {
+                completeButton.innerHTML = '<i class="fas fa-check"></i>';
+            }
             completeButton.onclick = () => toggleComplete(task);
+            
+            // Tombol Hapus dengan icon
             const deleteButton = document.createElement('button');
             deleteButton.className = 'btn-delete';
-            deleteButton.textContent = 'Hapus';
-            deleteButton.onclick = () => deleteTask(task.id, data.tasks.length); 
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteButton.onclick = () => deleteTask(task.id, data.tasks.length);
+            
             actions.appendChild(completeButton);
             actions.appendChild(deleteButton);
+            
             item.appendChild(title);
             item.appendChild(actions);
+            
             taskList.appendChild(item);
         });
+
 
         renderPagination(data.totalPages, data.currentPage);
 
