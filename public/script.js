@@ -1,82 +1,121 @@
 // public/script.js
 
-// Alamat base API kita
 const API_URL = 'http://localhost:8000/api/tasks';
+
+// State halaman saat ini dan limit per halaman
+let currentPage = 1;
+const LIMIT_PER_PAGE = 5; 
 
 // Mengambil elemen-elemen dari HTML
 const taskList = document.getElementById('task-list');
 const taskForm = document.getElementById('task-form');
 const taskInput = document.getElementById('task-input');
+const paginationControls = document.getElementById('pagination-controls');
 
-// --- FUNGSI UTAMA: Mengambil dan Menampilkan Semua Tasks ---
-const fetchTasks = async () => {
+// Get tasks dengan pagination
+const fetchTasks = async (page) => {
     try {
-        const response = await fetch(API_URL);
-        const tasks = await response.json();
+        taskList.innerHTML = '<li class="task-item">Loading...</li>';
+        paginationControls.innerHTML = ''; 
 
-        // Kosongkan daftar task sebelum diisi ulang
+        const response = await fetch(`${API_URL}?page=${page}&limit=${LIMIT_PER_PAGE}`);
+        const data = await response.json(); 
+
         taskList.innerHTML = '';
 
-        // Loop setiap task dan buat elemen HTML-nya
-        tasks.forEach(task => {
+        if (data.tasks.length === 0 && currentPage > 1) {
+            currentPage--;
+            fetchTasks(currentPage);
+            return;
+        }
+
+        data.tasks.forEach(task => {
             const item = document.createElement('li');
             item.className = 'task-item';
-            
             const title = document.createElement('span');
             title.textContent = task.title;
-            if (task.is_completed) {
-                title.className = 'completed';
-            }
-
+            if (task.is_completed) { title.className = 'completed'; }
             const actions = document.createElement('div');
             actions.className = 'actions';
-
-            // Tombol Selesai/Batal
             const completeButton = document.createElement('button');
             completeButton.className = 'btn-complete';
             completeButton.textContent = task.is_completed ? 'Batal' : 'Selesai';
             completeButton.onclick = () => toggleComplete(task);
-            
-            // Tombol Hapus
             const deleteButton = document.createElement('button');
             deleteButton.className = 'btn-delete';
             deleteButton.textContent = 'Hapus';
-            deleteButton.onclick = () => deleteTask(task.id);
-
+            deleteButton.onclick = () => deleteTask(task.id, data.tasks.length); 
             actions.appendChild(completeButton);
             actions.appendChild(deleteButton);
-            
             item.appendChild(title);
             item.appendChild(actions);
-            
             taskList.appendChild(item);
         });
+
+        renderPagination(data.totalPages, data.currentPage);
+
     } catch (error) {
         console.error('Gagal mengambil tasks:', error);
+        taskList.innerHTML = '<li class="task-item">Gagal memuat data. Coba lagi nanti.</li>';
     }
 };
 
-// --- FUNGSI: Menambah Task Baru ---
+
+// Render Tombol Pagination
+const renderPagination = (totalPages, page) => {
+    paginationControls.innerHTML = `
+        <button id="prev-btn" ${page <= 1 ? 'disabled' : ''}>Previous</button>
+        <span>Halaman ${page} dari ${totalPages}</span>
+        <button id="next-btn" ${page >= totalPages ? 'disabled' : ''}>Next</button>
+    `;
+
+    // Event listener
+    document.getElementById('prev-btn')?.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchTasks(currentPage);
+        }
+    });
+
+    document.getElementById('next-btn')?.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            fetchTasks(currentPage);
+        }
+    });
+};
+
+// Add Task
 taskForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Mencegah form reload halaman
-    
+    e.preventDefault();
     const title = taskInput.value;
     if (!title) return;
-
     try {
         await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title })
         });
-        taskInput.value = ''; // Kosongkan input
-        fetchTasks(); // Refresh daftar task
+        taskInput.value = '';
+        fetchTasks(currentPage); 
     } catch (error) {
         console.error('Gagal menambah task:', error);
     }
 });
 
-// --- FUNGSI: Mengubah Status Selesai (UPDATE) ---
+// Delete Task
+const deleteTask = async (id, tasksOnPage) => {
+    try {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        if (tasksOnPage === 1 && currentPage > 1) {
+            currentPage--;
+        }
+        fetchTasks(currentPage);
+    } catch (error) {
+        console.error('Gagal menghapus task:', error);
+    }
+};
+
 const toggleComplete = async (task) => {
     try {
         await fetch(`${API_URL}/${task.id}`, {
@@ -84,27 +123,13 @@ const toggleComplete = async (task) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 title: task.title,
-                is_completed: !task.is_completed // Balikkan statusnya
+                is_completed: !task.is_completed
             })
         });
-        fetchTasks(); // Refresh daftar task
+        fetchTasks(currentPage); 
     } catch (error) {
         console.error('Gagal mengupdate task:', error);
     }
 };
 
-// --- FUNGSI: Menghapus Task (DELETE) ---
-const deleteTask = async (id) => {
-    try {
-        await fetch(`${API_URL}/${id}`, {
-            method: 'DELETE'
-        });
-        fetchTasks(); // Refresh daftar task
-    } catch (error) {
-        console.error('Gagal menghapus task:', error);
-    }
-};
-
-
-// --- Jalankan fungsi fetchTasks saat halaman pertama kali dimuat ---
-fetchTasks();
+fetchTasks(currentPage);

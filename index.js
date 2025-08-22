@@ -33,10 +33,24 @@ const initializeDatabase = async () => {
   }
 };
 
-// Fungsi untuk memulai server
+// Global error handler
+
+const errorHandler = (err, req, res, next) => {
+  console.error("error: ", err.stack);
+  const statusCode = res.statusCode ? res.statusCode : 500;
+
+  res.status(statusCode);
+
+  res.json({
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  });
+};
+
+app.use(errorHandler);
+
 const startServer = async () => {
-  await initializeDatabase(); 
-  
+  await initializeDatabase();
   app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);
   });

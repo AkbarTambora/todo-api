@@ -78,3 +78,24 @@ button:hover {
 .actions .btn-complete:hover {
     background-color: #218838;
 }
+
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+.pagination-controls button {
+    background-color: #6c757d;
+}
+
+.pagination-controls button:hover {
+    background-color: #5a6268;
+}
+
+.pagination-controls button:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
